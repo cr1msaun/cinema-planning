@@ -252,8 +252,22 @@
       return hours + ':' + minutes;
     },
 
+    getPositionByTime: function (time) {
+      // Начало шкалы - 5:00
+      let initiateHour = 5;
+      let [hours, minutes] = time.split(':');
+
+      hours = parseInt(hours);
+      minutes = parseInt(minutes);
+
+      if (hours <= 4)
+        hours = hours + 24;
+
+      return (hours - initiateHour) * (60 * 2) + minutes * 2;
+    },
+
     setStartEndTime: function (showtime) {
-      let pos = parseInt(showtime.style.left) + (60 * 2) * 5; // шкада отсчета с 5 утра
+      let pos = parseInt(showtime.style.left) + (60 * 2) * 5; // шкала отсчета с 5 утра
       let duration = showtime.dataset.duration;
 
       let startTime = this.getTimeByPosition(pos);
@@ -273,12 +287,7 @@
 
       if (!startTime) return;
 
-      let [startHour, startMinute] = startTime.split(':');
-
-      // Начало шкалы - 5:00
-      let initiateHour = 5;
-
-      showtime.style.left = ( parseInt(startHour) - initiateHour ) * 60 * 2 + parseInt(startMinute) * 2 + 'px';
+      showtime.style.left = this.getPositionByTime(startTime) + 'px';
     },
 
     setDropzonesWidth: function () {
