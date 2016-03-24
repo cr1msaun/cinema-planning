@@ -240,6 +240,12 @@
       let hours = Math.floor(position / (60 * 2));
       let minutes = (position % (60 * 2)) / 2;
 
+      if (hours >= 24)
+        hours = hours - 24;
+
+      if (hours < 10)
+        hours = '0' + hours;
+
       if (minutes < 10)
         minutes = '0' + minutes;
 
@@ -247,7 +253,7 @@
     },
 
     setStartEndTime: function (showtime) {
-      let pos = parseInt(showtime.style.left) + 120 * 5; // шкада отсчета с 5 утра
+      let pos = parseInt(showtime.style.left) + (60 * 2) * 5; // шкада отсчета с 5 утра
       let duration = showtime.dataset.duration;
 
       let startTime = this.getTimeByPosition(pos);
