@@ -51,10 +51,20 @@ html, body {
   min-height: 100%;
   -webkit-font-smoothing: antialiased; }
 
+b, strong {
+  font-weight: bold; }
+
 header {
   height: 50px;
   border: 1px solid black;
-  background: #000; }
+  background: #000;
+  color: #fff; }
+
+.header-left {
+  padding: 0 0 0 10px; }
+
+.date-selector {
+  margin: 15px 0 0 0; }
 
 .sidebar {
   width: 15%;

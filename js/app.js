@@ -1,6 +1,11 @@
 (function () {
   "use strict";
 
+  // Изменяем дату
+  document.querySelector('.date-selector').onchange = function (e) {
+    location.href = this.value;
+  };
+
   // Используем делегирование
   document.addEventListener('mousedown', function (e) {
     // если нажатие не левой кнопкой мыши, ничего не делаем
