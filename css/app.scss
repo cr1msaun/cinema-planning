@@ -49,6 +49,11 @@ main {
 
 .movie-list {
   padding: 20px 0 0 0;
+
+  & .showtime {
+    width: 100%;
+    line-height: normal;
+  }
 }
 
 .movie-item {
@@ -59,6 +64,10 @@ main {
 
   &__options {
     margin: 5px 0 0;
+
+    &-item {
+      margin: 0 0 5px;
+    }
   }
 }
 
@@ -82,10 +91,6 @@ main {
   &__duration {
     display: inline;
     width: 40px;
-  }
-
-  .movie-list & {
-    width: 100%;
   }
 }
 
@@ -133,6 +138,7 @@ main {
   white-space: nowrap;
   font-size: 0;
   border: 1px solid black;
+  border-left: none;
 
   &-mod_active {
     background: #b1c4ce url(../img/dropzone.gif) repeat-x;
@@ -171,6 +177,12 @@ main {
       bottom: 3px;
       left: 3px;
       text-decoration: none;
+    }
+
+    em {
+      position: absolute;
+      bottom: 3px;
+      left: 50%;
     }
 
     i {

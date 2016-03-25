@@ -74,6 +74,9 @@ header {
 
 .movie-list {
   padding: 20px 0 0 0; }
+  .movie-list .showtime {
+    width: 100%;
+    line-height: normal; }
 
 .movie-item {
   margin: 0 5px;
@@ -82,6 +85,8 @@ header {
   border: 1px solid black; }
   .movie-item__options {
     margin: 5px 0 0; }
+    .movie-item__options-item {
+      margin: 0 0 5px; }
 
 .movie, .showtime {
   height: 40px;
@@ -100,8 +105,6 @@ header {
   .movie__duration, .showtime__duration {
     display: inline;
     width: 40px; }
-  .movie-list .movie, .movie-list .showtime {
-    width: 100%; }
 
 .content {
   float: left;
@@ -138,7 +141,8 @@ header {
   overflow: hidden;
   white-space: nowrap;
   font-size: 0;
-  border: 1px solid black; }
+  border: 1px solid black;
+  border-left: none; }
   .dropzone-mod_active {
     background: #b1c4ce url(../img/dropzone.gif) repeat-x; }
   .dropzone .showtime {
@@ -166,6 +170,10 @@ header {
       bottom: 3px;
       left: 3px;
       text-decoration: none; }
+    .showtime-container .showtime em {
+      position: absolute;
+      bottom: 3px;
+      left: 50%; }
     .showtime-container .showtime i {
       position: absolute;
       bottom: 3px;

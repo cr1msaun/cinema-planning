@@ -47,10 +47,10 @@
   });
 
   function DragFromList(movie, e) {
-    let movieId = movie.dataset.movieId,
-        movieDuration = movie.parentNode.querySelector('.movie__duration').value;
+    let movieDuration = movie.parentNode.querySelector('.movie__duration').value,
+        movieFormat = movie.parentNode.querySelector('.movie__format').value;
 
-    let showtime = h.createShowtime(movie, movieDuration);
+    let showtime = h.createShowtime(movie, movieDuration, movieFormat);
 
     moveAt(showtime, e);
 
@@ -61,7 +61,7 @@
       var elem = document.elementFromPoint(event.clientX, event.clientY);
       showtime.hidden = false;
 
-      if (elem == null) {
+      if (elem === null) {
         // такое возможно, если курсор мыши "вылетел" за границу окна
         return null;
       }
@@ -102,6 +102,7 @@
         showtime.hidden = true;
         h.promptStartTime(showtime);
         h.setStartEndTime(showtime);
+        h.setLastShowtimeEndTime(showtime);
         showtime.hidden = false;
 
         showtime.onmouseup = null;
@@ -150,8 +151,7 @@
   function UpdateBreak(showtime, e) {
     let breakBar = showtime.querySelector('.break');
 
-    var initMousePos = e.pageX,
-        initLeftPos = parseInt(showtime.style.left);
+    var initMousePos = e.pageX;
 
     document.onmousemove = function (e) {
         let currentMousePos = e.pageX;
@@ -172,7 +172,7 @@
     breakBar.onmouseup = function () {
       document.onmousemove = null;
       breakBar.onmouseup = null;
-    }
+    };
   }
 
 
@@ -180,13 +180,14 @@
   ** Helper functions
   */
   var h = {
-    createShowtime: function (movie, duration) {
+    createShowtime: function (movie, duration, format) {
       let showtime = document.createElement('div');
 
       showtime.classList.add('showtime-container');
       showtime.innerHTML = '<div class="showtime">' +
                               '<b></b>' +
                               '<s></s>' +
+                              '<em></em>' +
                               '<i></i>' +
                            '</div>' +
                            '<div class="break">' +
@@ -196,6 +197,7 @@
       showtime.querySelector('b').textContent = movie.textContent; // выставляем название фильма
 
       this.setDuration(showtime, duration); // выставляем хронометраж
+      this.setFormat(showtime, format); // выставляем формат
       this.setBreak(showtime); // выставляем перерыв
 
       return showtime;
@@ -210,11 +212,20 @@
       showtime.querySelector('.showtime').style.width = duration * 2 + 'px';
     },
 
+    getFormat: function (showtime) {
+      return +showtime.dataset.format;
+    },
+
+    setFormat: function (showtime, format) {
+      showtime.dataset.format = format;
+      showtime.querySelector('em').textContent = format;
+    },
+
     setBreak: function (showtime) {
       let duration = h.getDuration(showtime),
           breakTime;
 
-      if (duration % 5 != 0) {
+      if (duration % 5 !== 0) {
         breakTime = 10 - duration % 5;
       } else {
         breakTime = 10;
@@ -271,8 +282,17 @@
       return (hours - initiateHour) * (60 * 2) + minutes * 2;
     },
 
+    getPosition: function (showtime) {
+      return parseInt(showtime.style.left);
+    },
+
+    setPosition: function (showtime, newValue) {
+      showtime.style.left = newValue + 'px';
+    },
+
+    // устанавливает время начала и конца сеанса
     setStartEndTime: function (showtime) {
-      let pos = parseInt(showtime.style.left) + (60 * 2) * 5; // шкала отсчета с 5 утра
+      let pos = h.getPosition(showtime) + (60 * 2) * 5; // шкала отсчета с 5 утра
       let duration = showtime.dataset.duration;
 
       let startTime = this.getTimeByPosition(pos);
@@ -285,6 +305,12 @@
       showtime.querySelector('i').textContent = endTime;
     },
 
+    // устанавливает время окончания последнего сеанса
+    setLastShowtimeEndTime: function (showtime) {
+      console.log(h.getPositionByTime('00:10'));
+      //this.lastShowtimeEndTime = h.getTimeByPosition(h.getPositionByTime(showtime.dataset.endTime) + h.getPositionByTime(showtime.dataset.break));
+    },
+
     promptStartTime: function (showtime) {
       let lastShowtimeEndTime = this.lastShowtimeEndTime || '09:00';
 
@@ -292,7 +318,7 @@
 
       if (!startTime) return;
 
-      showtime.style.left = this.getPositionByTime(startTime) + 'px';
+      h.setPosition(showtime, this.getPositionByTime(startTime));
     },
 
     setDropzonesWidth: function () {
