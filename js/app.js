@@ -56,7 +56,7 @@
 
     movie.parentNode.appendChild(showtime);
 
-    function findDroppable(event) {
+    function findDropzone(event) {
       showtime.hidden = true;
       var elem = document.elementFromPoint(event.clientX, event.clientY);
       showtime.hidden = false;
@@ -81,7 +81,7 @@
     document.onmousemove = function (event) {
       moveAt(showtime, event);
 
-      let dropzone = findDroppable(event);
+      let dropzone = findDropzone(event);
 
       if (dropzone) {
         dropzone.classList.add('dropzone-mod_active');
@@ -91,22 +91,20 @@
     };
 
     showtime.onmouseup = function (event) {
-      var dropElem = findDroppable(event);
+      var dropzone = findDropzone(event);
 
-      if (dropElem) {
+      if (dropzone) {
         showtime.style.top = '0';
         showtime.style.left = '0';
 
-        dropElem.appendChild(showtime);
+        dropzone.appendChild(showtime);
 
-        showtime.hidden = true;
+        //showtime.hidden = true;
         h.promptStartTime(showtime);
         h.setStartEndTime(showtime);
-        h.setLastShowtimeEndTime(showtime);
-        showtime.hidden = false;
+        //showtime.hidden = false;
 
         showtime.onmouseup = null;
-        //DragWithinDropzone(movie, e);
       } else {
         showtime.parentNode.removeChild(showtime);
       }
@@ -268,6 +266,10 @@
       return hours + ':' + minutes;
     },
 
+    getFullDuration: function (showtime) {
+      return h.getDuration(showtime) + h.getBreak(showtime); // TODO: make proper method
+    },
+
     getPositionByTime: function (time) {
       // Начало шкалы - 5:00
       let initiateHour = 5;
@@ -307,12 +309,15 @@
 
     // устанавливает время окончания последнего сеанса
     setLastShowtimeEndTime: function (showtime) {
-      console.log(h.getPositionByTime('00:10'));
-      //this.lastShowtimeEndTime = h.getTimeByPosition(h.getPositionByTime(showtime.dataset.endTime) + h.getPositionByTime(showtime.dataset.break));
+      let lastShowtime = showtime.closest('.dropzone').querySelector('.showtime-container:nth-last-child(2)');
+
+      if (!lastShowtime) return 0;
+
+      return h.getTimeByPosition(h.getPosition(lastShowtime) + h.getFullDuration(lastShowtime) * 2 + (60 * 2) * 5);
     },
 
     promptStartTime: function (showtime) {
-      let lastShowtimeEndTime = this.lastShowtimeEndTime || '09:00';
+      let lastShowtimeEndTime = h.setLastShowtimeEndTime(showtime) || '09:00';
 
       let startTime = prompt('Введите время начала сеанса', lastShowtimeEndTime);
 
@@ -340,4 +345,5 @@
   };
 
   h.init();
+  window.h = h;
 })();
