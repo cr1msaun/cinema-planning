@@ -54,21 +54,35 @@ html, body {
 b, strong {
   font-weight: bold; }
 
+.clear {
+  clear: both; }
+
 header {
   height: 50px;
+  line-height: 50px;
   border: 1px solid black;
   background: #000;
   color: #fff; }
 
 .header-left {
-  padding: 0 0 0 10px; }
+  padding: 0 0 0 10px;
+  float: left; }
 
-.date-selector {
-  margin: 15px 0 0 0; }
+.header-right {
+  padding: 0 10px 0 0;
+  float: right; }
+
+.button {
+  padding: 5px; }
+
+main {
+  clear: both; }
 
 .sidebar {
-  width: 15%;
+  width: 250px;
   min-height: 500px;
+  max-height: 670px;
+  overflow-y: auto;
   float: left;
   border-right: 1px solid black; }
 
@@ -79,7 +93,7 @@ header {
     line-height: normal; }
 
 .movie-item {
-  margin: 0 5px;
+  margin: 0 5px 5px;
   padding: 5px;
   border-radius: 5px;
   border: 1px solid black; }
@@ -89,26 +103,32 @@ header {
       margin: 0 0 5px; }
 
 .movie, .showtime {
+  width: 227px;
   height: 40px;
-  line-height: 40px;
   padding: 0 5px;
   border: 1px solid black;
   font-size: 14px;
   cursor: move;
-  position: relative; }
+  position: relative;
+  display: table-cell;
+  vertical-align: middle;
+  background: #3f6b87;
+  color: #fff;
+  font-weight: bold; }
   .movie:after, .showtime:after {
     content: '>';
     display: block;
     position: absolute;
-    top: 0;
-    right: 5px; }
+    top: 50%;
+    right: 5px;
+    -webkit-transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    -o-transform: translateY(-50%);
+    transform: translateY(-50%); }
   .movie__duration, .showtime__duration {
     display: inline;
     width: 40px; }
-
-.content {
-  float: left;
-  width: 85%; }
 
 .halls {
   width: 100px;
@@ -160,7 +180,9 @@ header {
   .showtime-container .showtime {
     float: left;
     padding: 0;
-    border: 0; }
+    border: 0;
+    text-overflow: ellipsis;
+    overflow: hidden; }
     .showtime-container .showtime b {
       position: absolute;
       top: 3px;

@@ -21,8 +21,13 @@ b, strong {
   font-weight: bold;
 }
 
+.clear {
+  clear: both;
+}
+
 header {
   height: 50px;
+  line-height: 50px;
   border: 1px solid black;
   background: #000;
   color: #fff;
@@ -30,19 +35,31 @@ header {
 
 .header-left {
   padding: 0 0 0 10px;
+  float: left;
+}
+
+.header-right {
+  padding: 0 10px 0 0;
+  float: right;
 }
 
 .date-selector {
-  margin: 15px 0 0 0;
+
+}
+
+.button {
+  padding: 5px;
 }
 
 main {
-
+  clear: both;
 }
 
 .sidebar {
-  width: 15%;
+  width: 250px;
   min-height: 500px;
+  max-height: 670px;
+  overflow-y: auto;
   float: left;
   border-right: 1px solid black;
 }
@@ -57,7 +74,7 @@ main {
 }
 
 .movie-item {
-  margin: 0 5px;
+  margin: 0 5px 5px;
   padding: 5px;
   border-radius: 5px;
   border: 1px solid black;
@@ -72,20 +89,30 @@ main {
 }
 
 .movie, .showtime {
+  width: 227px;
   height: 40px;
-  line-height: 40px;
   padding: 0 5px;
   border: 1px solid black;
   font-size: 14px;
   cursor: move;
   position: relative;
+  display: table-cell;
+  vertical-align: middle;
+  background: rgb(63, 107, 135);
+  color: #fff;
+  font-weight: bold;
 
   &:after {
     content: '>';
     display: block;
     position: absolute;
-    top: 0;
+    top: 50%;
     right: 5px;
+    -webkit-transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    -o-transform: translateY(-50%);
+    transform: translateY(-50%);
   }
 
   &__duration {
@@ -95,8 +122,7 @@ main {
 }
 
 .content {
-  float: left;
-  width: 85%;
+
 }
 
 .halls {
@@ -165,6 +191,8 @@ main {
     float: left;
     padding: 0;
     border: 0;
+    text-overflow: ellipsis;
+    overflow: hidden;
 
     b {
       position: absolute;
