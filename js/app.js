@@ -376,7 +376,7 @@
         let showtimes = hall.querySelectorAll('.showtime-container');
 
         if (!showtimes.length)
-          return;
+          continue;
         else
           hall.classList.add('dropzone-mod_active');
 
