@@ -6,6 +6,10 @@
     location.href = this.value;
   };
 
+  document.querySelector('.button-type_save').onclick = function(e) {
+    h.saveShowtimes();
+  };
+
   // Используем делегирование
   document.addEventListener('mousedown', function (e) {
     // если нажатие не левой кнопкой мыши, ничего не делаем
@@ -70,8 +74,6 @@
     }
 
     function moveAt(el, event) {
-      //console.log(event.pageX, event.pageY);
-
       el.style.position = 'absolute';
       el.style.zIndex = '1000';
       el.style.left = event.pageX - el.offsetWidth / 2 + 'px';
@@ -121,14 +123,7 @@
 
     document.onmousemove = function (e) {
         var curPos = e.pageX;
-
         var diff = curPos - initPos;
-
-        //console.log(diff);
-        //if (diff > 0)
-        //  step += 10;
-        //else
-        //  step += -10;
 
         h.setPosition(showtime, initLeft + diff);
     };
@@ -152,12 +147,14 @@
     document.onmousemove = function (e) {
         let currentMousePos = e.pageX;
 
+        // уменьшение (тянем влево)
         if ( (initMousePos - currentMousePos) >= 10) {
           h.updateBreak(showtime, h.getBreak(showtime) - 5);
 
           initMousePos = currentMousePos;
         }
 
+        // увеличение (тянем вправо)
         if ( (initMousePos - currentMousePos) <= -10) {
           h.updateBreak(showtime, h.getBreak(showtime) + 5);
 
@@ -185,18 +182,31 @@
                               '<s></s>' +
                               '<em></em>' +
                               '<i></i>' +
+                              '<span></span>' +
                            '</div>' +
                            '<div class="break">' +
                               '' +
                            '</div>';
 
-      showtime.querySelector('b').textContent = movie.textContent; // выставляем название фильма
-
+      this.setName(showtime, movie.textContent); // выставляем название фильма
       this.setDuration(showtime, duration); // выставляем хронометраж
       this.setFormat(showtime, format); // выставляем формат
       this.setBreak(showtime); // выставляем перерыв
 
+      showtime.querySelector('span').onclick = function() {
+        h.removeShowtime(showtime);
+      };
+
       return showtime;
+    },
+
+    getName: function (showtime) {
+      return showtime.dataset.name;
+    },
+
+    setName: function (showtime, newName) {
+      showtime.dataset.name = newName;
+      showtime.querySelector('b').textContent = newName;
     },
 
     getDuration: function (showtime) {
@@ -208,13 +218,8 @@
       showtime.querySelector('.showtime').style.width = duration * 2 + 'px';
     },
 
-    getFormat: function (showtime) {
-      return showtime.dataset.format;
-    },
-
-    setFormat: function (showtime, format) {
-      showtime.dataset.format = format;
-      showtime.querySelector('em').textContent = format;
+    getBreak: function (showtime) {
+      return +showtime.dataset.break;
     },
 
     setBreak: function (showtime) {
@@ -233,10 +238,6 @@
       showtime.querySelector('.break').textContent = breakTime + '`';
     },
 
-    getBreak: function (showtime) {
-      return +showtime.dataset.break;
-    },
-
     updateBreak: function (showtime, newValue) {
       if (newValue <= 0) return;
 
@@ -246,6 +247,19 @@
 
       breakBar.style.width = newValue * 2 + 'px';
       breakBar.textContent = newValue + '`';
+    },
+
+    getFormat: function (showtime) {
+      return showtime.dataset.format;
+    },
+
+    setFormat: function (showtime, format) {
+      showtime.dataset.format = format;
+      showtime.querySelector('em').textContent = format;
+    },
+
+    getTime: function(showtime) {
+      return h.getTimeByPosition(h.getPosition(showtime));
     },
 
     getTimeByPosition: function (position) {
@@ -265,7 +279,7 @@
     },
 
     getFullDuration: function (showtime) {
-      return h.getDuration(showtime) + h.getBreak(showtime); // TODO: make proper method
+      return h.getDuration(showtime) + h.getBreak(showtime);
     },
 
     getPositionByTime: function (time) {
@@ -304,7 +318,6 @@
       h.setPosition(showtime, startTimePos);
     },
 
-    // устанавливает время начала и конца сеанса
     setEndTime: function (showtime) {
       let duration = h.getDuration(showtime);
 
@@ -320,7 +333,7 @@
       h.setEndTime(showtime);
     },
 
-    // устанавливает время окончания последнего сеанса
+    // устанавливает время окончания последнего сеанса (TODO: reformat)
     getLastShowtimeEndTime: function (showtime) {
       let lastShowtime = showtime.closest('.dropzone').querySelector('.showtime-container:nth-last-child(2)');
 
@@ -338,6 +351,10 @@
 
       h.setStartTime(showtime, startTime);
       h.setEndTime(showtime);
+    },
+
+    removeShowtime: function (showtime) {
+      showtime.parentNode.removeChild(showtime);
     },
 
     setDropzonesWidth: function () {
@@ -358,10 +375,22 @@
         let hall = halls[i];
         let showtimes = hall.querySelectorAll('.showtime-container');
 
+        if (!showtimes.length)
+          return;
+        else
+          hall.classList.add('dropzone-mod_active');
+
         for (let j = 0; j < showtimes.length; j++) {
           let showtime = showtimes[j];
 
           h.setPosition(showtime, h.getPositionByTime(h.getStartTime(showtime))); // выставляем позицию
+
+          let closeButton = document.createElement('span')
+          showtime.querySelector('.showtime').appendChild(closeButton);
+
+          showtime.querySelector('span').onclick = function() {
+            h.removeShowtime(showtime);
+          };
 
           h.setDuration(showtime, h.getDuration(showtime)); // выставляем хронометраж
           h.setEndTime(showtime); // выставляем окончание фильма
@@ -369,6 +398,56 @@
           h.updateBreak(showtime, h.getBreak(showtime)); // выставляем перерыв
         }
       }
+    },
+
+    saveShowtimes: function() {
+      let data = {
+        'date': document.querySelector('.date-selector').value.substr(6),
+        'halls': {}
+      };
+
+      let halls = document.querySelectorAll('.dropzone');
+
+      for (let i = 0; i < halls.length; i++) {
+        let hall = halls[i];
+        let showtimes = hall.querySelectorAll('.showtime-container');
+
+        let showtimesData = [];
+
+        for (let j = 0; j < showtimes.length; j++) {
+          let showtime = showtimes[j];
+
+          let showtimeData = {
+            'name': h.getName(showtime),
+            'time': h.getTime(showtime),
+            'duration': h.getDuration(showtime),
+            'break': h.getBreak(showtime),
+            'format': h.getFormat(showtime)
+          };
+
+          showtimesData.push(showtimeData);
+        }
+
+        data.halls[hall.dataset.id] = showtimesData;
+      }
+
+      let xhr = new XMLHttpRequest();
+
+      xhr.open('POST', '/ajax_handler.php', true);
+      xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+      xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+
+      xhr.onreadystatechange = function() {
+        if (this.readyState != 4) return;
+
+        if (this.status != 200) {
+          alert('Извините, произошла ошибка сервера:' + xhr.status + ', ' + xhr.statusText);
+        } else {
+          alert('Сохранено');
+        }
+      };
+
+      xhr.send('action=saveShowtimes&data=' + JSON.stringify(data));
     },
 
     init: function () {

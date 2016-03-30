@@ -1,3 +1,6 @@
+<? require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_before.php") ?>
+<? require('./functions.php') ?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -12,23 +15,27 @@
 <!--[if lt IE 8]>
 <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
 <![endif]-->
-
 <header>
     <div class="header-left">
         <b>Дата:</b>
         <select class="date-selector">
-            <option value="2016.03.25">2016.03.25</option>
-            <option value="2016.03.25">2016.03.26</option>
-            <option value="2016.03.25">2016.03.27</option>
+            <? foreach (getDates() as $date): ?>
+            <option value="?date=<? echo $date ?>" <? echo ($date == $selected_date ? 'selected="selected"' : '') ?>><? echo $date ?></option>
+            <? endforeach ?>
         </select>
+    </div>
+    <div class="header-right">
+        <button class="button button-type_save">СОХРАНИТЬ</button>
+        <a href="print.html?date=<? echo $selected_date ?>" target="_blank" class="button button-type_print">ПЕЧАТЬ</a>
     </div>
 </header>
 
 <main>
     <div class="sidebar">
         <div class="movie-list">
+            <? foreach (getMovies() as $movie): ?>
             <div class="movie-item">
-                <div class="movie" data-movie-id="90">ZOOTOPIA</div>
+                <div class="movie"><? echo $movie['NAME'] ?></div>
                 <div class="movie-item__options">
                     <div class="movie-item__options-item">
                         Хронометраж: <input type="number" value="90" class="movie__duration">
@@ -41,68 +48,44 @@
                         </select>
                     </div>
                 </div>
-
             </div>
+            <? endforeach ?>
         </div>
     </div>
     <div class="content">
         <div class="halls">
+            <? foreach (getHalls() as $hall): ?>
             <div class="halls__item">
-                Зал №1
+                <? echo $hall['NAME'] ?>
             </div>
-            <div class="halls__item">
-                Зал №2
-            </div>
-            <div class="halls__item">
-                Зал №3
-            </div>
+            <? endforeach ?>
         </div>
         <div class="showtimes">
             <div class="times">
-                <div class="times__hour">5:00</div>
-                <div class="times__hour">6:00</div>
-                <div class="times__hour">7:00</div>
-                <div class="times__hour">8:00</div>
-                <div class="times__hour">9:00</div>
-                <div class="times__hour">10:00</div>
-                <div class="times__hour">11:00</div>
-                <div class="times__hour">12:00</div>
-                <div class="times__hour">13:00</div>
-                <div class="times__hour">14:00</div>
-                <div class="times__hour">15:00</div>
-                <div class="times__hour">16:00</div>
-                <div class="times__hour">17:00</div>
-                <div class="times__hour">18:00</div>
-                <div class="times__hour">19:00</div>
-                <div class="times__hour">20:00</div>
-                <div class="times__hour">21:00</div>
-                <div class="times__hour">22:00</div>
-                <div class="times__hour">23:00</div>
-                <div class="times__hour">00:00</div>
-                <div class="times__hour">1:00</div>
-                <div class="times__hour">2:00</div>
-                <div class="times__hour">3:00</div>
-                <div class="times__hour">4:00</div>
+                <? foreach(getScheduleHours() as $hour): ?>
+                <div class="times__hour"><? echo $hour ?></div>
+                <? endforeach ?>
             </div>
             <div class="dropzones">
-                <div class="dropzone">
-
+                <? foreach (getHalls() as $hall): ?>
+                <div class="dropzone" data-id="<? echo $hall['ID']?>">
+                    <? foreach(getShowtimes($selected_date, $hall['ID']) as $showtime): ?>
+                        <div class="showtime-container" data-name="<? echo $showtime['NAME'] ?>" data-duration="<? echo $showtime['DURATION'] ?>" data-format="<? echo $showtime['FORMAT'] ?>" data-break="<? echo $showtime['BREAK'] ?>" style="position: absolute; top: 0px;" data-start-time="<? echo $showtime['START_TIME'] ?>"><div class="showtime">
+                                <b><? echo $showtime['NAME'] ?></b>
+                                <s><? echo $showtime['START_TIME'] ?></s>
+                                <em><? echo $showtime['FORMAT'] ?></em>
+                                <i></i>
+                            </div>
+                            <div class="break"><? echo $showtime['BREAK'] ?>`</div>
+                        </div>
+                    <? endforeach ?>
                 </div>
-                <div class="dropzone">
-
-                </div>
-                <div class="dropzone">
-
-                </div>
+                <? endforeach ?>
             </div>
         </div>
     </div>
+    <div class="clear"></div>
 </main>
-
-
-
-
-
 <script src="js/app.js"></script>
 </body>
 </html>
