@@ -1,0 +1,48 @@
+<? require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_before.php") ?>
+<? require('./functions.php') ?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Cinema Planning - print showtimes</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+</head>
+<body>
+
+    <h2 class="text-center">РАСПИСАНИЕ СЕАНСОВ НА <? echo $_REQUEST['date']?></h2>
+    <? foreach (getHalls() as $hall): ?>
+    <table class="table table-striped table-bordered table-condensed" style="width: 85%; margin-left: auto; margin-right: auto;">
+        <tr>
+            <td colspan="6" class="text-center">
+                <b><? echo $hall['NAME']?></b>
+            </td>
+        </tr>
+        <tr>
+            <td class="text-center"><small>Начало</small></td>
+            <td class="text-center"><small>Окончание</small></td>
+            <td><small>Название</small></td>
+            <td class="text-center"><small>Продолжит.</small></td>
+            <td class="text-center"><small>Формат</small></td>
+            <td class="text-center"><small>Перерыв</small></td>
+        </tr>
+        <? foreach(getShowtimes($selected_date, $hall['ID']) as $showtime): ?>
+        <tr>
+            <td class="text-center"><? echo $showtime['START_TIME'] ?></td>
+            <td class="text-center"><? echo $showtime['END_TIME'] ?></td>
+            <td><? echo $showtime['NAME'] ?></td>
+            <td class="text-center"><? echo $showtime['DURATION'] ?></td>
+            <td class="text-center"><? echo $showtime['FORMAT'] ?></td>
+            <td class="text-center"><? echo $showtime['BREAK'] ?></td>
+        </tr>
+        <? endforeach ?>
+    </table>
+    <? endforeach ?>
+    <script>
+        //print();
+    </script>
+</body>
+</html>
