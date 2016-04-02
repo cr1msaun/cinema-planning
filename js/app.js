@@ -44,7 +44,7 @@
 
     // если нажали на фильме в расписании зала
     if (dragMovie.closest('.dropzone')) {
-      DragWithinDropzone(dragMovie.parentNode, e);
+      DragWithinDropzone(dragMovie.closest('.dropzone'), dragMovie.parentNode, e);
 
       return false;
     }
@@ -60,19 +60,6 @@
 
     movie.parentNode.appendChild(showtime);
 
-    function findDropzone(event) {
-      showtime.hidden = true;
-      var elem = document.elementFromPoint(event.clientX, event.clientY);
-      showtime.hidden = false;
-
-      if (elem === null) {
-        // такое возможно, если курсор мыши "вылетел" за границу окна
-        return null;
-      }
-
-      return elem.closest('.dropzone');
-    }
-
     function moveAt(el, event) {
       el.style.position = 'absolute';
       el.style.zIndex = '1000';
@@ -83,41 +70,44 @@
     document.onmousemove = function (event) {
       moveAt(showtime, event);
 
-      let dropzone = findDropzone(event);
+      let dropzone = h.findDropzone(showtime, event);
 
       if (dropzone) {
         dropzone.classList.add('dropzone-mod_active');
+        dropzone.appendChild(showtime);
+
+        // если перетащили на полоску зала, убираем события и обрабатываем как перемещение внутри зала
+        document.onmousemove = null;
+        showtime.onmouseup = null;
+
+        h.clearSelection();
+
+        DragWithinDropzone(dropzone, showtime, e);
       } else {
         //document.querySelector('.dropzone-mod_active').classList.remove('dropzone-mod_active');
       }
     };
 
-    showtime.onmouseup = function (event) {
-      var dropzone = findDropzone(event);
+    showtime.onmouseup = function (e) {
+      var dropzone = h.findDropzone(showtime, e);
 
-      if (dropzone) {
-        showtime.style.top = '0';
-        showtime.style.left = '0';
-
-        dropzone.appendChild(showtime);
-
-        //showtime.hidden = true;
-        h.promptStartTime(showtime);
-        //showtime.hidden = false;
-
-        showtime.onmouseup = null;
-      } else {
+      if (!dropzone) {
         showtime.parentNode.removeChild(showtime);
       }
 
-      showtime.classList.remove('dragging');
+      h.clearSelection();
 
       document.onmousemove = null;
       showtime.onmouseup = null;
     };
   }
 
-  function DragWithinDropzone(showtime, e) {
+  function DragWithinDropzone(dropzone, showtime, e) {
+    let showtimesBlock = document.querySelector('.showtimes');
+
+    // устанавливаем позицию по курсору относительно зала
+    h.setPosition(showtime, (e.pageX + showtimesBlock.scrollLeft) - dropzone.offsetLeft - showtime.clientWidth / 2);
+
     var initPos = e.pageX,
         initLeft = h.getPosition(showtime);
 
@@ -144,7 +134,7 @@
 
     var initMousePos = e.pageX;
 
-    document.onmousemove = function (e) {
+    document.onmousemove = function (e) { // TODO: reformat saving
         let currentMousePos = e.pageX;
 
         // уменьшение (тянем влево)
@@ -188,16 +178,27 @@
                               '' +
                            '</div>';
 
+      this.closeButton(showtime); // вешаем событие на крестик
+
       this.setName(showtime, movie.textContent); // выставляем название фильма
       this.setDuration(showtime, duration); // выставляем хронометраж
       this.setFormat(showtime, format); // выставляем формат
       this.setBreak(showtime); // выставляем перерыв
 
-      showtime.querySelector('span').onclick = function() {
-        h.removeShowtime(showtime);
-      };
-
       return showtime;
+    },
+
+    findDropzone: function(showtime, event) {
+      showtime.style.display = 'none';
+      var elem = document.elementFromPoint(event.clientX, event.clientY);
+      showtime.style.display = '';
+
+      // такое возможно, если курсор мыши "вылетел" за границу окна
+      if (elem === null) {
+        return null;
+      }
+
+      return elem.closest('.dropzone');
     },
 
     getName: function (showtime) {
@@ -343,6 +344,9 @@
     },
 
     promptStartTime: function (showtime) {
+      showtime.style.top = '0'; // TODO: FIX WINDOWS BUG
+      showtime.style.left = '0';
+
       let lastShowtimeEndTime = h.getLastShowtimeEndTime(showtime) || '09:00';
 
       let startTime = prompt('Введите время начала сеанса', lastShowtimeEndTime);
@@ -355,6 +359,12 @@
 
     removeShowtime: function (showtime) {
       showtime.parentNode.removeChild(showtime);
+    },
+
+    closeButton: function(showtime) {
+      showtime.querySelector('span').onclick = function() {
+        h.removeShowtime(showtime);
+      };
     },
 
     setDropzonesWidth: function () {
@@ -385,12 +395,7 @@
 
           h.setPosition(showtime, h.getPositionByTime(h.getStartTime(showtime))); // выставляем позицию
 
-          let closeButton = document.createElement('span')
-          showtime.querySelector('.showtime').appendChild(closeButton);
-
-          showtime.querySelector('span').onclick = function() {
-            h.removeShowtime(showtime);
-          };
+          h.closeButton(showtime); // вешаем событие на крестик
 
           h.setDuration(showtime, h.getDuration(showtime)); // выставляем хронометраж
           h.setEndTime(showtime); // выставляем окончание фильма
@@ -402,7 +407,7 @@
 
     saveShowtimes: function() {
       let data = {
-        'date': document.querySelector('.date-selector').value.substr(6),
+        'date': document.querySelector('.date-selector').value.substr(6), // reformat
         'halls': {}
       };
 
@@ -410,8 +415,8 @@
 
       for (let i = 0; i < halls.length; i++) {
         let hall = halls[i];
-        let showtimes = hall.querySelectorAll('.showtime-container');
 
+        let showtimes = hall.querySelectorAll('.showtime-container');
         let showtimesData = [];
 
         for (let j = 0; j < showtimes.length; j++) {
@@ -448,6 +453,16 @@
       };
 
       xhr.send('action=saveShowtimes&data=' + JSON.stringify(data));
+    },
+
+    clearSelection: function () {
+      var sel;
+
+      if (document.selection && document.selection.empty) {
+          document.selection.empty();
+      } else if(window.getSelection) {
+          sel = window.getSelection().removeAllRanges();
+      }
     },
 
     init: function () {
