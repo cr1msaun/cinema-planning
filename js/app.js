@@ -44,7 +44,7 @@
 
     // если нажали на фильме в расписании зала
     if (dragMovie.closest('.dropzone')) {
-      DragWithinDropzone(dragMovie.closest('.dropzone'), dragMovie.parentNode, e);
+      DragWithinDropzone(dragMovie.parentNode, e);
 
       return false;
     }
@@ -82,7 +82,12 @@
 
         h.clearSelection();
 
-        DragWithinDropzone(dropzone, showtime, e);
+        let showtimesBlock = document.querySelector('.showtimes');
+
+        // устанавливаем позицию по курсору относительно зала
+        h.setPosition(showtime, (e.pageX + showtimesBlock.scrollLeft) - dropzone.offsetLeft - showtime.clientWidth / 2);
+
+        DragWithinDropzone(showtime, e);
       } else {
         //document.querySelector('.dropzone-mod_active').classList.remove('dropzone-mod_active');
       }
@@ -102,12 +107,7 @@
     };
   }
 
-  function DragWithinDropzone(dropzone, showtime, e) {
-    let showtimesBlock = document.querySelector('.showtimes');
-
-    // устанавливаем позицию по курсору относительно зала
-    h.setPosition(showtime, (e.pageX + showtimesBlock.scrollLeft) - dropzone.offsetLeft - showtime.clientWidth / 2);
-
+  function DragWithinDropzone(showtime, e) {
     var initPos = e.pageX,
         initLeft = h.getPosition(showtime);
 
@@ -331,29 +331,6 @@
 
     updateStartEndTime: function(showtime) {
       h.setStartTime(showtime, h.getTimeByPosition(h.getPosition(showtime)));
-      h.setEndTime(showtime);
-    },
-
-    // устанавливает время окончания последнего сеанса (TODO: reformat)
-    getLastShowtimeEndTime: function (showtime) {
-      let lastShowtime = showtime.closest('.dropzone').querySelector('.showtime-container:nth-last-child(2)');
-
-      if (!lastShowtime) return 0;
-
-      return h.getTimeByPosition(h.getPosition(lastShowtime) + h.getFullDuration(lastShowtime) * 2);
-    },
-
-    promptStartTime: function (showtime) {
-      showtime.style.top = '0'; // TODO: FIX WINDOWS BUG
-      showtime.style.left = '0';
-
-      let lastShowtimeEndTime = h.getLastShowtimeEndTime(showtime) || '09:00';
-
-      let startTime = prompt('Введите время начала сеанса', lastShowtimeEndTime);
-
-      if (!startTime) return;
-
-      h.setStartTime(showtime, startTime);
       h.setEndTime(showtime);
     },
 
