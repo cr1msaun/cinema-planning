@@ -152,6 +152,10 @@ main {
 .showtimes {
   margin: 0 0 0 100px;
   overflow-x: scroll;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .times {
@@ -197,6 +201,10 @@ main {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+
+  .dropzone & {
+    top: 0px !important;
+  }
 
   .showtime {
     float: left;
