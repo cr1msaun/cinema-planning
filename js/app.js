@@ -385,9 +385,11 @@
     saveShowtimes: function() {
       let data = {
         'date': document.querySelector('.date-selector').value.substr(6), // reformat
-        'halls': {}
+        'halls': {},
+        'movies': {}
       };
 
+      // формируем массив фильмов
       let halls = document.querySelectorAll('.dropzone');
 
       for (let i = 0; i < halls.length; i++) {
@@ -413,9 +415,21 @@
         data.halls[hall.dataset.id] = showtimesData;
       }
 
+      // формируем массив фильмов и сохраняем их продолжительность
+      let movies = document.querySelectorAll('.movie-item');
+
+      for (let i = 0; i < movies.length; i++) {
+        let movie = movies[i];
+
+        let movieId = movie.dataset.id;
+        let movieDuration = movie.querySelector('.movie__duration').value;
+
+        data.movies[movieId] = movieDuration;
+      }
+
       let xhr = new XMLHttpRequest();
 
-      xhr.open('POST', '/ajax_handler.php', true);
+      xhr.open('POST', 'ajax_handler.php', true);
       xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
       xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 

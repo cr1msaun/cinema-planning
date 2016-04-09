@@ -34,11 +34,11 @@
     <div class="sidebar">
         <div class="movie-list">
             <? foreach (getMovies() as $movie): ?>
-            <div class="movie-item">
+            <div class="movie-item" data-id="<?=$movie['ID']?>">
                 <div class="movie"><? echo $movie['NAME'] ?></div>
                 <div class="movie-item__options">
                     <div class="movie-item__options-item">
-                        Хронометраж: <input type="number" value="90" class="movie__duration">
+                        Хронометраж: <input type="number" value="<?=($movie['PROPERTY_PLANNING_DURATION_VALUE'] ? $movie['PROPERTY_PLANNING_DURATION_VALUE'] : '90')?>" class="movie__duration">
                     </div>
                     <div class="movie-item__options-item">
                         Формат:

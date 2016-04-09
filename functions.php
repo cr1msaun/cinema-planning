@@ -42,7 +42,10 @@ function getMovies() {
 			'IBLOCK_ID' => MOVIES_IBLOCK_ID,
 			'ACTIVE' => 'Y',
 			'>DATE_CREATE' => ConvertTimeStamp(strtotime('-62 days'), "FULL")
-		)	
+		),
+		false,
+		false,
+		array('ID', 'NAME', 'PROPERTY_PLANNING_DURATION')
 	);
 
 	while ($movie = $moviesRes->GetNext())
@@ -88,4 +91,47 @@ function getShowtimes($date, $hallId) {
     }
 
     return $showtimes;
+}
+
+function saveShowtimes($data) {
+    if (!$data) return;
+
+    $hallsRes = CIBlockElement::GetList(
+        array(),
+        array('IBLOCK_ID' => 6)
+    );
+
+    while ($hall = $hallsRes->GetNext()) {
+        $hallShowtimes = array();
+        $showtimesRes = CIBlockElement::GetProperty(6, $hall['ID'], array(), array("CODE" => "SHOWTIMES"));
+
+        while ($showtime = $showtimesRes->GetNext())
+        {
+            if (!$showtime['VALUE'] || $data->date == date('Y.m.d', strtotime($showtime['VALUE']))) continue;
+
+            $hallShowtimes[$hall['ID']][] = array('VALUE' => $showtime['VALUE'], 'DESCRIPTION' => $showtime['DESCRIPTION']);
+        }
+
+        foreach ($data->halls as $id => $showtimes) {
+            foreach ($showtimes as $showtime) {
+                if ($hall['ID'] != $id) continue;
+
+                $hallShowtimes[$hall['ID']][] = array(
+                    'VALUE' => date('d.m.Y', strtotime(str_replace('.', '-', $data->date))) . ' ' . $showtime->time . ':00',
+                    'DESCRIPTION' => $showtime->name . '//' . $showtime->duration . '//' . $showtime->break . '//' . $showtime->format
+                );
+            }
+
+            usort($hallShowtimes[$hall['ID']], 'sortFunctionWithProperDateFormat');
+        }
+
+        CIBlockElement::SetPropertyValues($hall['ID'], 6, $hallShowtimes[$hall['ID']], 'showtimes');
+    }
+
+    // сохраняем длительность
+    $movies = $data->movies;
+
+    foreach ($movies as $movieId=>$movieDuration) {
+        CIBlockElement::SetPropertyValues($movieId, MOVIES_IBLOCK_ID, $movieDuration, 'PLANNING_DURATION');
+    }
 }
